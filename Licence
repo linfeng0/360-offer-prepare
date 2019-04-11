@@ -1,3 +1,11 @@
-I del my first input in my Licence file,and insert this sentence in it
-I love you ,linmomo
-I want to go to xi'an,and I want to marry with linmomo,I want to have a family with my beloved!
+linfeng del linfeng's first input in linfeng's Licence file,and insert this sentence in it
+linfeng love you ,linmomo
+linfeng want to go to xi'an,and linfeng want to marry with linmomo,linfeng want to have a family with linfeng's beloved!
+
+
+I learned my vi skiil to goto the last line with 'shift+g' as "G"
+and goto the last char of the last line with "shift+4" as "$"
+goto the first line with "gg" or "shift+h" as "H"
+and goto the middle line with "shift + m" as "M"
+and search for replace with ":line1,line2+s/word1/word2/g" in the bottom line order module
+yead!!!great!
