@@ -14,3 +14,6 @@
 	set fileencoding=ucs-bom,utf-8,cp936,gb18030,big5,euc-jp,euc-kr,layin1
 
 source一下，ok！！！
+
+
+测试一下冲突！master
