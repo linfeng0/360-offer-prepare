@@ -47,16 +47,104 @@
 	
 
 4.python元类
+	元类的概念：说元类，我们不免要提到的是python的类(class)，
+	python类是负责生成类实例对象(instance)的一段代码，带括号调用这个类的时候，返回的是类的实例对象，不带括号，返回的是类本身
+	那么在python我们怎么去构造一个类呢？
+	第一种方法就是class关键字静态地来写一个类，
+	python 中类也是对象，那我们需要动态地来生成类时，用什么呢？答案就是元类(metaclass)。所以元类就是用来生成类对象的类！
+	好，串一下流程：
+		Myclass = Metaclass() 元类生成类对象
+		MyobjectofMyclass = Myclass() 类生成类实例对象
+	进一步理解一下：
+		我们知道python中的所有东西都是对象，对象都是由类创建而来的，python常见的类有number/str/tuple/list/dict/set/function等等等等，我们可以用对象的__class__属性(obj.__class__)或者用type(obj)来查看对象是由哪个类创建的(也就是说对象是哪一个类的实例)，那么思考一下obj.__class__.__class__或者type(type(obj))会返回什么？
+		a = int
+		a.__class__	#<class int>
+		a.__class__.__class__ #<class type>
+	答案是type，type不是用来返回对象的类的函数吗？原来在python中的type函数有两种用法，一种方法我们刚刚用过，用来返回对象的所属类，另一种方法：
+		type(class_name,(父类元组),{属性字典})
+		用来生成一个类对象，这下明白了，原来python中的类最终都是由type生成的
+	
+	正式引进元类的概念：python中一切对象都是由类生成，元类就是生成类的类。type是python的内建元类，我们可以用class关键字来静态地写一个类，也可以用type元类来动态地生成一个类,当然我们也可以自己创建自己的元。	
+	__metaclass__属性，在类中添加的metaclass属性，用于指定类的元类
+	没有添加metaclass属性的话默认会用type，但是我们去调类的metaclass属性的时候会提示该类没有metaclass属性(（has no attribution '__metaclass__')
+	这是时候，我们先来关注一下类实例对象的整个创建过程：
+		表面上，我们用class关键字写一段代码声明一个类，然后带括号调用该类就可生成一个类实例对象。
+		实际上，python解释器在底层做了这些工作：
+		1.加载到类代码的时候，python解释器并没有直接在内存新建一个类对象，而是先去找这个类对象的metaclass属性，
+		2.如果有，就用metaclass指定的元类的new方法新建一个类，在用元类的init方法初始化这个类，这时候，内存中才有了我们声明的类的类对象，跳到5
+		3.如果没有，找它的继承类的metaclass属性，转2，没找到重复3，如果所有父类中都没有metaclass属性，跳4
+		4.如果遍历整个父系都没有metaclass属性，再找整个模块的metaclass，找到了返回2，如果还是没有，用python内建元类type来生成我们声明的类，声明的过程和2类似。
+		5.生成了类对象以后，用类对象的new方法新建一个类实例对象，在用类对象的init方法初始化这个实例！
 
-5.python的三种方法：静态方法，类方法，实例方法
+	我们自定义的元类，返回值的是type或子类化type，也就是要能生成一个类对象的东西（函数和类都可以），对元类中的new方法和init方法重写就可以自由地创造出我们需要的类。
+	元类的复杂程度很高，它的作用主要是：
+		1.拦截类的创建
+		2.修改类
+		3.返回修改后的类	
+	def func_metaclass(future_class_name,future_class_parents,future_class_attr):
+		'''对属性和方法进行修改'''
+		pass
+		return type(future_classname,future_class_parents,future_class_attr)
+	
+	class Metaclass(type):
+		def __new__(cls,future_class_name,future_class_parents,future_class_attr):
+			'''修改'''
+			pass
+			return super(Metaclass,cls).__new__(cls,name,bases,dict)
+	__metaclass_ = func_metaclass #模块内的metaclass
+	class A(object):
+		__metaclass__=Metaclass
+		pass
 
-6.python中的类变量和实例变量
 
-7.python自省
+
+	一般来说我们不需要用元类来进行对类的修改，如果需要在不修改源码的情况下动态地修改一个类，我们可以使用：
+	1.猴子补丁
+	2.装饰器（一般用于函数的修改）
+	3.class decorators
+
+	
+		
+
+
+5.python的三种方法：静态方法，类方法，属性方法，实例方法
+	静态方法：
+	@staticmethod，通过类直接调用，不需要实例对象，不传self和cls
+		不会访问类的内部属性和方法
+
+	类方法：传入的第一个参数是cls，也就是类本身，而不是实例对象
+	@classmethod，调用传入的self是类本身，调用方法是也必须是类的公有属性
+		类方法只能操纵类的公有属性
+
+	
+	
+	属性方法：
+	@property
+	
+	
+
+	实例方法：没有装饰器，第一个参数self传入的是实例对象
+
+	方法这么多？什么时候用呢？
+	一切逻辑上不依赖于类与实例的方法，就可以使用静态方法
+	类方法一般做两种用途：1.工厂方法，用来在生成实例之前做一些预处理
+		  	      2.静态方法调用静态方法，可以用类方法来替代，用cls去替代硬编码，不影响多态					
+	但凡是需要对于具体实例结果不同的情况，都应该使用实例方法（开发时一般都是使用实例方法）
+	属性方法等到讲了python的类变量（私有变量）以后再说
+
+
+
+6.python中的类变量和实例变量:
+	类变量：类在定义时就生成了的变量，实例公有的对象，所有实例都可以访问的对象
+	实例变量：为实例单独绑定的变量，只有当前实例可以访问
+
+7.python 中的下划线
+	
+	
 
 8.python推导式（list推导式，set推导式，dict推导式，生成器推导式）
 
-9.python 中的下划线
+9.python自省
 
 10.生成器与迭代器
 
@@ -72,7 +160,7 @@
 
 16.python实现单例模式
 
-17.python为什么不需要函数重载（python的鸭子特性）
+17.python为什么不需要函数重载（python的鸭子特性
 
 18.python的GIL锁
 
@@ -103,6 +191,6 @@
 
 29.python字符串与字节序列
 
-
+30.super方法
 
 
