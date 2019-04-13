@@ -1,0 +1,39 @@
+14号：
+	整理完python的一半基础知识，
+	整理一下操作系统：进程、线程、协程
+	再一次使用Linux三剑客命令grep、awk、sed
+	刷两道算法题
+	计算机网络的网络层ip协议好好看看书
+	
+	commit：
+		python基础.txt
+		操作系统.txt
+		计算机网络.txt
+		剑指offer_python.txt
+	
+
+15号：	
+	整理完python基础的所有知识
+	Linux常用命令
+	sql常用命令
+	
+	晚上在git上看一遍14号的所有内容
+	
+	commit：
+		python基础.txt
+		Linux常用命令.txt
+		数据库/数据库.txt
+
+
+
+
+
+
+
+
+
+
+
+
+20号:	
+	列出所有的文件的完整目录，学习一下目录制法！！！
