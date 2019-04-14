@@ -1,15 +1,15 @@
 14号：
-	整理完python的一半基础知识，
-	整理一下操作系统：进程、线程、协程
-	再一次使用Linux三剑客命令grep、awk、sed
-	刷两道算法题
-	计算机网络的网络层ip协议好好看看书
+	整理完python的一半基础知识  (完成）
+	整理一下操作系统：进程、线程、协程。（完成）
+	再一次使用Linux三剑客命令grep、awk、sed （未完成）
+	刷两道算法题	（未完成）
+	计算机网络的网络层ip协议好好看看书。（未完成）
 	
 	commit：
-		python基础.txt
-		操作系统.txt
-		计算机网络.txt
-		剑指offer_python.txt
+		python基础.txt。（完成）
+		操作系统.txt。（完成
+		计算机网络.txt。（未完成）
+		剑指offer_python.txt。（未完成）
 	
 
 15号：	
