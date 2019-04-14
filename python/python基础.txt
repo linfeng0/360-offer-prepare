@@ -14,7 +14,7 @@
 	因此，传入的是可变对象的话，函数内部对参数的修改在函数外部有效，
 	传入的是不可变对象的话，函数内部对参数的修改在函数外部无效，
 	还要注意的是，python函数的传参的顺序要严格按照以上顺序传入（尤其是可变参数（元组）和关键字参数（字典））
-	另外，默认参数一般不要使用可变对象，因为函数的调用次数并不只有一次，当默认参数使用可变对象时，函数的第二次调用，默认参数的值将是第一次函数调用时调整后的值，除非我们在程序中需要这么做，否则应当避免使用可变对象做默认参数。
+	另外，默认参数一般不要使用可变对象，因为函数的调用次数通常情况并不只有一次，当默认参数使用可变对象时，函数的第二次调用，默认参数的值将是第一次函数调用时调整后的值，除非我们在程序中需要这么做，否则应当避免使用可变对象做默认参数。
 
 3.python的深拷贝，浅拷贝：
 	python对象的拷贝大致分为三种：1.复制 2.浅拷贝 3.深拷贝
@@ -236,42 +236,241 @@
 		内嵌函数只能访问不能修改外套函数的局部变量，要修改，用可变对象或者在变量前声明nonlocal
 
 14.python面向切面编程与装饰器
-	面向切面编程：函数在执行的过程中转入另一段
-
+	在运行时，编译时，类和方法加载时，动态地将代码切入到类的指定方法、指定位置上的编程思想就是面向切面的编程。
+	python的装饰器常常用来在不改变原来对象的代码的情况下，为原来的对象添加额外的功能。有了装饰器，我们就可以抽取函数中与函数本身逻辑代码无关又大量重复的雷同代码进行重用。
 
 
 
 15.__metaclass__,__init__,__new__,__call__
+	__metaclass__：指定元类
+	__new__：新建一个全新的实例对象,并返回这个新建的对象
+	__init__：对__new__方法新建的实例对象初始化
+	__call__：使一个类实例能像函数一样被调用
+
 
 16.python实现单例模式
+	单例模式：保证一个类对象只有一个实例
+	a）python模块天生就是一种单例模式，其在第一个次导入以后会生成.pyc文件，之后导入，加载.pyc文件
+	b）使用装饰器：
+	def Singleton(cls):
+		_instance={}
+		def _singleton(*args,**kw):
+			if cls not in _instance:
+				_instance[cls] = cls(*args,**kw)
+			return _instance[cls]
+		return _singleton
+	
+	@Singleton	
+	class A():
+		pass
+	
+	a = A()
+	b = A()   #id(a) = id(b)
 
-17.python为什么不需要函数重载（python的鸭子特性
 
-18.python的GIL锁
+	c) 使用类方法：
+	class Singleton():
+		def __init__(self):
+			pass
+		@classmethod
+		def instance(cls,*args,**kw):
+			if not hasattr(cls,'_instance'):
+				cls._instance = cls(*args,**kw)
+			return cls._instance
 
-19.python多进程与多线程
+	a = Singleton.instance()
+	b = Singleton.instance()
+	#id(a) = id(b)
+
+
+	d) 重写__new__方法:
+	class Singleton():
+		def __new__(cls,**args,**kw):
+			if not hasattr(cls,'_instance'):
+				cls._instance = object.__new__(cls)
+		return cls._instance
+	a = Singleton()
+	b = Singleton()
+	#id(a) = id(b)
+
+	e) 基于metaclass:
+	class Singleton(type):
+		def __call__(cls,*args,**kw):
+			if not hasattr(cls,'_instance'):
+				cls._intance = super(Singleton,cls).__call__(*args,**kw)
+		return cls._instance
+	class Foo(metaclass=Singleton):
+		pass
+
+	a = Foo()
+	b = Foo()
+	#id(a) = id(b)
+
+
+
+
+	
+		
+17.python为什么不需要函数重载（python的鸭子特性）
+	函数重载无非是两种情况的需求导致：
+	同一个函数名要对以下两种参数的情况实现同一种逻辑功能：
+	a）函数参数类型不同
+	b）函数参数个数不同
+	在python中，参数类型的概念并不严谨，python可以接受任意类型的参数
+	另外，函数参数个数不同在python可以用默认参数来处理
+
+18.python多进程与多线程
+	python实现多进程：
+		a) os模块下的fork系统调用
+		import os
+		print('Process (%s) start ...'%os.getpid())
+		pid=os.fork()
+		if pid == 0:
+			print('I am the child process %s,and my parent procss is %s'%(os.getpid(),os.getppid()))
+		else:
+			print('I-process(%s) just create a child process %s'%(os.getppid(),pid))
+
+		缺点：只有Linux/Unix系统有，Windows没有
+		
+		b）跨平台的多进程模块multiprocessing 
+			multiprocessing里有Process类专门来创建子进程
+			from multiprocessing import Process
+			import os
+			def run_proc(name):
+				print('Run child process %s (%s)...'%(name,os.getpid())
+			if __name__ == '__main__':
+				print('parent process : %s'%os.getpid)
+				p=Process(target=run_proc,args=('test',))
+				print('Child process will start')
+				p.start()
+				p.join()
+				print('child process ended')
+
+			multiprocessing模块下的Pool进程池：
+				from multiprocessing import Pool
+				import os, time, random
+
+				def long_time_task(name):
+   					print('Run task %s (%s)...' % (name, os.getpid()))
+    					start = time.time()
+    					time.sleep(random.random() * 3)
+    					end = time.time()
+    					print('Task %s runs %0.2f seconds.' % (name, (end - start)))
+
+				if __name__=='__main__':
+    					print('Parent process %s.' % os.getpid())
+    					p = Pool(4)
+    					for i in range(5):
+       		 				p.apply_async(long_time_task, args=(i,))
+    						print('Waiting for all subprocesses done...')
+    						p.close()
+    						p.join()
+    						print('All subprocesses done.')
+ 	
+			subprocess模块用于新建一个新的进程
+					import subprocess
+					print('$ nslookup www.python.org')
+					r = subprocess.call(['nslookup', 'www.python.org'])
+					print('Exit code:', r)
+
+			进程间通信:
+				Queue和pipes
+
+	多线程：
+		python实现多线程主要是threding模块
+		t = threading.Thread(target=loop, name='LoopThread')
+		t.start()
+		t.join()
+		
+		多线程共享同一进程的地址空间，多个线程对共享内存进行修改的时候，容易发生不可控的结果，要加锁
+		lock = threading.Lock()
+		lock.require()
+		try:	
+			'''锁内操作'''
+			pass
+		finnally:
+			lock.release()		
+
+19.python的GIL锁
+	python解释器在全局上为多线程加的锁，每个线程要执行都必须拿到这个锁，每执行100条字节码，就释放这个锁，所以python程序的多线程只能交替执行，多线程无法利用多核，多线程的并发在python中就是一个梦
+	解决办法：多进程加协程
 
 20.协程
+	协程的概念出现得比线程还要早。要理解协程，首先理解函数（或者说是子程序）的调用，在一段程序中函数A调用函数B，转入B中执行，函数B又调用函数C，转入函数C执行，C执行完返回，转回B继续执行，B执行完返回，转入A继续执行，A执行完毕返回。
+	A——————>B——————>c————————>B————————>A
+	协程类似于自程序的调用，但是与自程序调用不同的是协程在子程序（函数）内部可以中断，然后转去执行的别的子程序（函数）（不是一个调用关系），然后在适当的时候又返回来执行原来的子程序（函数）
+	python对协程的支持是通过生成器来支持的
+	python中的生成器函数yield不仅可以返回一个值，还可以接收一个值，还可将生成的值返回去
+	
 
+	def consumer():
+    		r = ''
+   		while True:
+       			n = yield r #接受send传递过来的值
+        		if not n:
+            			return
+        		print('[CONSUMER] Consuming %s...' % n)
+        		r = '200 OK'
+
+	def produce(c):
+    		c.send(None) #开启生成器
+    		n = 0
+    		while n < 5:
+        		n = n + 1
+        		print('[PRODUCER] Producing %s...' % n)
+        		r = c.send(n) #转入consumer
+        		print('[PRODUCER] Consumer return: %s' % r)
+    		c.close()
+
+	c = consumer()
+	produce(c)
 21.python匿名函数（lambda表达式）
+	lambda 参数: expression 常用来写一些逻辑简单只用一次的函数
 
 22.python面向函数编程与高阶函数（应该放到闭包之前）
-
+	面向函数编程的重要思想：函数可以作为参数传入另外的函数进行使用
+	python中的高阶函数有三个：
+	reduce(function,序列)  #累计运算
+	map(function,序列)  #序列的每个元素上应用function，并且返回一个新的list
+	filter(function,序列） filter会将function依次作用到序列的每一个元素上，如果返回值是True，就保留序列的当前值，如果返回值是False，就丢弃当前值
+	
+	偏函数：functools模块下的partical
+		int2() = functools.partial(int,base=2)
+		实际上是固定了关键字参数--->{base = 2}
+		固定int函数的参数base等于2，并用int2命名
 23.python的垃圾回收机制
-
+	三种方法：
+		1.引用计数，python为每一个对象都有一个计数器，当一个对象有了新的引用的时候，计数器的值加一，对象的引用删除以后，技术器的值减一，如果引用数目为0，则对象的生命周期结束，回收对象的内存
+		2.标记-清除技术：
+		先按需分配，当内存不够用的时候，从寄存器的和程序栈的引用出发，遍历以对象为节点，以引用为边生成的图，遍历到的对象都加一个标记，遍历完以后将没有标记到的对象清除
+		3.分代技术
+		将系统中的所有内存块根据其存活时间划分为不同的集合，每个集合就成为一个“代”，垃圾收集频率随着“代”的存活时间的增大而减小，存活时间通常利用经过几次垃圾回收来度量。
+			
 24.read，readline和readlines
-
+	read读取整个文件，将整个文件放到一个字符串变量中
+	readline读取一行，返回一个字符串对象，返回一个字符串变量
+	readlines 读取整个文件，返回结果是一个行的列表
 25.python类
 	a）python元类
+		类用来创建类实例对象，类本身也是一个对象，类由其元类创建，是其元类的实例对象
+		python内建元类（type）
+		元类指定（metaclass）
 	b）python类的创建过程
+		python加载到class关键字的类代码以后，并非直接就在内存中生成了一个类对象，而是要寻找其__metaclass__（父系的metaclass--->模块指定的metaclass------->内建元类type），用找到的元类的__new__,__init__方法来创建一个类对象
 	c）__init__和__new__方法
+		__new__方法主要是新建一个全新的实例对象，并将其返回
+		__init__方法负责将__new__方法新建的实例对象初始化
 	d）__slot__属性
+		制定了__slot__属性以后，class将不能指定__dict__来存储属性
+		主要是为了属性存储速度的提高，存储利用率更高
+		带来的副作用就是，实例无法绑定新的属性
 	e）__dict__属性
+		存储class的属性，底层相当于一个hash表，检索效率高
 	
 26.super方法在新式类中的使用
-
+	super方法，调用基类的方法
 27.python的内存池机制
-
+	当初创建大量消耗小内存的对下岗的时候，频繁调用new/malloc会导致大量的内部碎片，只是效率降低，内存池的概念就是预先在内存中申请一定数量的大小相等的内存块作为备用，当有新的内存需求的时候，就先从内存池中分配内存给这个需求，不够了再申请新的内存
 28.三种描述符：@staticmethod，@classmethod，@property
 
 29.python字符串与字节序列
