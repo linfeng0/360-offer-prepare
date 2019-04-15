@@ -58,3 +58,72 @@ git总结：
 	git reflog 返回对于当前仓库的所有commit和reset日志
 
         这两个命令的返回信息的每一次commi里就有commit id
+
+
+git远程仓库：
+	添加远程仓库：一般用于github、码市这样的在线代码托管平台，首先要在github或者码市上的账号设置里将机器的公钥添加进去，才能有权限操作远程仓库
+	然后在github上create一个新的仓库，拿到该仓库的地址，一般都是git@github*****
+	然后才本地仓库执行：
+		git remote add origin 远程仓库地址
+	这样本地仓库就和远程仓库建立了连接
+	然后把本地内容推送到远程仓库：git push -u origin master(第一次使用加-u),git就会把远程的master仓库和本地的仓库关联起来，以后在本地master分支下使用git push就可以将本地master分支推送到远程的master
+	（github给出的仓库地址还有http开头的，使用的是http协议，默认的git://使用的ssh
+	从远程仓库克隆：
+		git clone 远程仓库地址
+
+分支管理：
+	创建分支：git checkout -b 分支名（-b参数创建分支并转到分支）（--参数表示撤销操作）
+	切换分支：git checkout 分支名
+	查看分支：git branch  带星号的是正在使用的分支
+	删除分支：git checkout -d 分支名
+	删除一个没有提交过的分支：git checkout -D 分支名（一般是这歌分支上内容不需要了，没有必要提交，提交了以后有问题，需要删除）
+	合并分支：git merge 分支名
+	
+冲突解决：
+	冲突什么时候产生？当两个分支同时修改了同一份文件的时候，在合并这两个分支的时候，就会产生冲突
+	git status可以查看冲突具体信息
+	git log --graph可以查看分支合并记录
+	解决冲突一般是要手动修改文件代码，留哪个删哪个，使两个分支的内容一致
+	
+bug分支：
+	正在自己分支上干活的时候。突然来一个紧急bug需要解决，我们需要新建一个bug分支去解决这个bug，但是正在写的代码暂时又不能提交，所以我们需要暂存一下当前分支的修改
+	git stash命令存储当前分支的修改
+	修改完bug以后合并，然后删除bug分支，切换回原来分支
+	最后用git stash pop返回原来的状态接着写
+	还有git stash list
+	git stash apply+git stash drop/git stash apply stash{n}
+	
+	git stash 用来隐藏当前不想提交的代码，避免一次脏提交
+
+
+
+多人协作：
+	查看远程库信息，使用git remote -v；
+
+	本地新建的分支如果不推送到远程，对其他人就是不可见的；
+
+	从本地推送分支，使用git push origin branch-name，如果推送失败，先用git pull抓取远程的新提交；
+
+	在本地创建和远程分支对应的分支，使用git checkout -b branch-name origin/branch-name，本地和远程分支的名称最好一致；
+
+	建立本地分支和远程分支的关联，使用git branch --set-upstream branch-name origin/branch-name；
+
+	从远程抓取分支，使用git pull，如果有冲突，要先处理冲突。
+
+	
+	
+标签管理：
+	git tag <tagname> 打标签,默认搭载当前的HEAD上，后面也可跟commit—id
+	git tag -a <tagname> -m <tag_content>
+	git tag 查看所有标签	
+	git show <tagname> 展示标签详情
+	git tag -d <tagname> 删除标签
+	git push origin :refs/tags/<tagname>删除远程标签
+	git push origin <tagname> 推送标签到远程
+	git push origin --tags 推送所有未推送的标签到远程
+
+
+	
+	
+
+
