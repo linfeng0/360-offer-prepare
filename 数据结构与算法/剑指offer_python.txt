@@ -1,0 +1,36 @@
+1.顺时针打印二维矩阵：
+	[[1,2,3,4],
+	[5,6,7,8],
+	[9,10,11,12],
+	[13,14,15,16]]
+ 返回打印值的数组
+
+先分析一下这个题，要顺时针输出整个二维数组，可以转换成为每一次都输出二维数组的第一个元素，输出完以后，对二维数组进行逆时针旋转90度，再重复输出第一个元素，直到二维数组为空。
+
+
+
+class solution(self,matrix)
+	def printMatrix(self,matrix):
+		if not matrix:
+			return []
+		result = []	
+		while matrix:
+			result.append(matrix.pop(0) #输出第一行
+			if matrix:
+				matrix = self.turn(matrix) #如果二维数组不为空，代表还未全部输出，旋转二维数组
+		return result
+
+	def turn(self,matrix): #旋转二维数组的函数
+		num_h=len(matrix[o]) #二维数组的行长度
+		num_s=len(matrix) #二维数组的列长度
+		res=[] 
+		for i in range(num_h): #行号做外循环，因为循转以后，列做了行，也就是说行坐标相同的元素到了一起
+			a = []
+			for j in range(num_s): #列号做内循环，把每一列的行号相同的元素提取到一个list边
+				a.append(matrix[j][i])
+			res.append(a) #每一列组成的新list插入到旋转以后的二维数组
+		res.reverse() #因为是逆时针旋转，而res里边的第一个list元素是左边的第一列，也就是说res是个顺时针旋转，需要对res进行一次颠倒
+		return res
+
+
+
